@@ -1,0 +1,22 @@
+<incu8ator>
+	<step1>
+		<hour>24</hour>
+		<temp>37.8</temp>
+		<hum>60</hum>
+	</step1>
+	<step2>
+		<hour>240</hour>
+		<temp>37.5</temp>
+		<hum>60</hum>
+	</step2>
+	<step3>
+		<hour>120</hour>
+		<temp>37.0</temp>
+		<hum>60</hum>
+	</step3>
+	<step4>
+		<hour>120</hour>
+		<temp>36.8</temp>
+		<hum>80</hum>
+	</step4>
+</incu8ator>
