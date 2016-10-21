@@ -12,23 +12,19 @@
 #include "sensorBase.h"
 #include "displayBase.h"
 #include "programWheel.h"
-#include "incu8atorLog.h"
+#include "log.h"
 
 class incu8ator {
 private:
 	bool dbg;
 	sensorBase *s;
 	displayBase *d; 
-	programWheel *p;
-	
-	void log(std::string msg, int l=0);
+	programWheel *p;	
 public:
 	incu8ator(void);
 	virtual ~incu8ator(void);
 	bool initIncu8ator(std::string const sensorType, std::string const displayType);
 	void startIncu8ator(void);
 	bool controlTemp(void);
-	void _debug(void);
-	void _release(void);
 };
 #endif

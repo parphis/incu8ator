@@ -1,14 +1,15 @@
 #include "programWheel.h"
 #include "utils.h"
+
 bool programWheel::startProgramWheel(void) {
 	// first check if there is a file in /etc/incu8ator/step.cache.
 	// if yes read in the step number and the elapsed time (this 
 	// can be used to recover the status in case of power supply issue).
 	std::string res;
 	if(loadStatus(stepID, el->elapsedSeconds, res)) {
-		std::cout << "Found state.xml" << std::endl;
+		log::inf("Found state.xml");
 	}
-	else	std::cout << res << std::endl;
+	else	log::err(res);
 
 	// This cannot be used here because of a g++ 4.7.2 bug?
 	//std::thread t1(el);	
@@ -19,6 +20,7 @@ bool programWheel::startProgramWheel(void) {
 	// http://stackoverflow.com/questions/29966780/overload-resolution-issue-in-generic-vector-class (check the accepted answer)
 	std::thread t1(&elapsedTimeThread::start, el);
 
+	log::inf("elapsedTimeThread detaching now...");
 	t1.detach();
 
 	return true;
@@ -72,6 +74,7 @@ bool programWheel::processConfig(std::string& res) {
 	if(result) {
 		double hour, temp, hum;
 		int i = 1;
+		std::stringstream ss;
 		pugi::xml_node next_step;
 		root = doc.child(ROOT_NODE_NAME);
 
@@ -86,6 +89,11 @@ bool programWheel::processConfig(std::string& res) {
 			Step nextStep = Step(hour, temp, hum, i-1);
 
 			steps.push_back(nextStep);
+			
+			ss.clear();
+			ss.str(std::string());
+			ss << "New step was added. id:" << nextStep.id << ", hour:" << nextStep.interval;
+			log::inf(std::string(ss.str()));
 
 			next_step = root.child((std::string(STEP_NODE_NAME).append(NumberToString(i+1)).c_str()));
 		}
@@ -101,12 +109,15 @@ double programWheel::getWantedTemperature(void) {
 		double wanted = 0.0;
 		double s = el->getElapsedSeconds();
 		double h = s/3600;
-
-		std::cout << "Current elpased time in hours: " << h << std::endl;
-		std::cout << "Current elpased time in sec: " << s << std::endl;
-		std::cout << "Current stepID and interval: " << stepID << " - " << steps.at(stepID).interval << std::endl;
+		std::stringstream ss;
+		ss << "getWantedTemperature::Elapsed time [sec/hours]: " << s << "/" << h << ". Current stepID/interval: " << stepID << "/" << steps.at(stepID).interval;
+		log::inf(ss.str());
 
 		if(h >= steps.at(stepID).interval) {
+			ss.clear();
+			ss.str(std::string());
+			ss << "StepID " << stepID << " has ended after " << s << " seconds.";
+			log::inf(ss.str());
 			s = el->elapsedSeconds = 0.0;
 			stepID+=1;
 		}
@@ -114,7 +125,7 @@ double programWheel::getWantedTemperature(void) {
 		wanted = steps.at(stepID).temp;
 		// save the current status - stepID and elapsed time in seconds
 		if(!saveStatus(stepID, s)) {
-			std::cout << "Unable to save the status file to " << statusXMLPath << std::endl;
+			log::wrn(std::string("Unable to save the status file to ").append(statusXMLPath));
 		}
 
 		return wanted;

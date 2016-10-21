@@ -3,6 +3,7 @@
 #include <cstring>
 #include "incu8ator.h"
 #include "utils.h"
+#include "log.h"
 
 void usage(void) {
 	std::cout << "*** incu8ator ***" << std::endl;
@@ -32,8 +33,8 @@ int main(int argc, char* argv[]) {
 
 	incu8ator *i = new incu8ator();
 
-	// maybe this shuold be set up from a command line argment?
-	i->_debug();
+	// maybe this should be set up from a command line argument?
+	log::_debug();
 
 	// undetectable sensor or program wheel issue
 	// both of them are mandatory to run the device

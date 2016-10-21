@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <time.h>
 #include <unistd.h>
 #include <cstdlib>
@@ -20,6 +21,7 @@
 #include <thread>
 #include "./pugi/pugixml-1.7/src/pugixml.hpp"
 #include "elapsedTimeThread.h"
+#include "log.h"
 
 class programWheel {
 private:
@@ -55,7 +57,7 @@ private:
 	bool saveStatus(int stepID, double elapsedSeconds);
 	bool loadStatus(int& stepID, double& elapsedSeconds, std::string& res);
 public:
-	programWheel(void) : progWheelXMLPath("/etc/incu8ator/progwheel.xml\0"),statusXMLPath("/etc/incu8ator/state.xml\0"), stepID(0), MAX_STEPS(100), ROOT_NODE_NAME("incu8ator\0"), STEP_NODE_NAME("step\0"), HOUR_NODE_NAME("hour\0"), TEMP_NODE_NAME("temp\0"), HUM_NODE_NAME("hum\0"), STATE_NODE_NAME("state\0"), STEPID_NODE_NAME("stepID\0"), ELAPSED_NODE_NAME("elapsed\0") {;}
+	programWheel(void) : progWheelXMLPath("/etc/incu8ator/progwheel.xml\0"),statusXMLPath("/etc/incu8ator/state.xml\0"), stepID(0), MAX_STEPS(100), ROOT_NODE_NAME("incu8ator\0"), STEP_NODE_NAME("step\0"), HOUR_NODE_NAME("hour\0"), TEMP_NODE_NAME("temp\0"), HUM_NODE_NAME("hum\0"), STATE_NODE_NAME("state\0"), STEPID_NODE_NAME("stepID\0"), ELAPSED_NODE_NAME("elapsed\0") {log::_ident("incu8ator<programWheel>");}
 	~programWheel(void) {if(el) delete el;}
 	double getWantedTemperature(void);
 	double getWantedHumidity(void);
