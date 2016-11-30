@@ -1,0 +1,21 @@
+Start:
+with 14 eggs (2 chickens and 12 ducks) - Nov. 09. 2016 00:31:13, with line in the rc.local:
+sudo /home/pi/incu8ator/nc8tr -d OLED12864 -s dht22 -a 1 -q 3 --debug --report &
+
+End:
+at Nov. 30. 2016 00:44:21.
+Even if there were no any problems during the execution only one duck egg has seemed to be growing (moving something in within). 
+The others has remained "untouched".
+
+Conclusions/experiences:
+- the infrared lamp is too big and it is too close to the eggs within the box which causes the temperature is too concentrated.
+  => build in a heating wire instead of using the infrared lamp.
+- the box is not well enough insulated so the lamp was turned on and off in ca. every 20 seconds.
+  => insulation must be checked and repaired.
+- the elapsed time was missing from the display. I had to login with ssh each time to know what the process does.
+  => the phase and the elapsed time in hours should be displayed along with the temperature and the humidity.
+- the one duck egg was only on the half way of growing at the end of the process.
+  => a.) investigate how much job must be done to allow the configuration parameters (progwheel.xml) be modifiable on-the-fly.
+  => b.) give only one step and set it to 40 days of running or more.
+- DHT22 is the most cheap but may be not the best sensor for this purpose.
+  => another more precise sensor should be used.
