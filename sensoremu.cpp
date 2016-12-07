@@ -17,6 +17,9 @@ void sensorEmu::initSensor(void) {
 }
 sensorEmu::sensorEmu(void) {
 	initSensor();
+	if(bcm2835_init()==false) {
+		log::err("BCM2835 library initialization failed!");
+	}
 }
 sensorEmu::~sensorEmu(void) {
 }

@@ -5,6 +5,8 @@
 #ifndef DHT22EMUH
 #define DHT22EMUH
 
+#include "bcm2835.h"
+#include "log.h"
 #include "sensorBase.h"
 
 class sensorEmu : public sensorBase

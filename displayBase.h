@@ -6,6 +6,8 @@
 
 #include <iostream>
 #include <string>
+#include "ArduiPi_SSD1306.h"
+#include "Adafruit_SSD1306.h"
 
 class displayBase {
 public:

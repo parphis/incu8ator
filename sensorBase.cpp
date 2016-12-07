@@ -2,14 +2,24 @@
 #include "sensoremu.h"
 #include "sensorDHT22.h"
 
-double sensorBase::getTemperature(void) {
+float sensorBase::getTemperature(void) {
 	return temperature;
 }
-double sensorBase::getHumidity(void) {
+float sensorBase::getHumidity(void) {
 	return humidity;
 }
-short int sensorBase::getCrcError(void) {
+short int sensorBase::getCrcError(std::string& e) {
+	e = errorString;
 	return crcError;
+}
+int sensorBase::getCrcErrorCounter(void) {
+	return crcErrorCounter;
+}
+void sensorBase::setGPIOPin(int pin) {
+	mGPIOPin = pin;
+}
+void sensorBase::setAlgorythm(int a) {
+	mReadAlgorythm = a;
 }
 sensorBase* sensorBase::createSensor(std::string type) {
 	if(type=="emulator")
@@ -20,6 +30,6 @@ sensorBase* sensorBase::createSensor(std::string type) {
 }
 void sensorBase::getFormattedLines(std::string& lines) {
 	std::ostringstream os;
-	os << temperature << "°C\n" << humidity << "%\n" << (crcError ? "Sensor read error\n" : "");
+	os << temperature << "C " << humidity << "% " << (crcError ? "Sensor read error" : "");
 	lines = os.str();
 }

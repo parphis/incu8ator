@@ -61,6 +61,7 @@ public:
 	~programWheel(void) {if(el) delete el;}
 	double getWantedTemperature(void);
 	double getWantedHumidity(void);
+	double getElapsedHours(void);
 	bool initProgramWheel(std::string& res);
 	bool startProgramWheel(void);
 };

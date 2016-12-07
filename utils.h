@@ -8,6 +8,21 @@
 void handle_sigalrm(int signal);
 void do_sleep(int seconds);
 
+inline void to_binary(uint8_t n, std::string& b) {
+	char bit;
+	b = "";
+	
+	while(1) {
+		if ((n%2)==0) {
+			bit = '0';
+		}
+		else	bit = '1';
+		b.push_back(bit);
+		n >>= 1;
+		if (n==0)	break;
+	}
+}
+
 // http://www.cplusplus.com/articles/D9j2Nwbp
 template <typename T>
 std::string NumberToString(T Number) {

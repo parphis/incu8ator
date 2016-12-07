@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <time.h>
 #include "sensorBase.h"
 #include "displayBase.h"
 #include "programWheel.h"
@@ -19,11 +20,20 @@ private:
 	bool dbg;
 	sensorBase *s;
 	displayBase *d; 
-	programWheel *p;	
+	programWheel *p;
+	bool heating;
+	double prevTemp;
+	double maxTemp;
+	int maxSensorError;
+	inline void clearSS(std::stringstream& ss);
+	void sdt(std::string& s);
+	void toogleHeating(int level);
+	void heatOn(void);
+	void heatOff(void);
 public:
 	incu8ator(void);
 	virtual ~incu8ator(void);
-	bool initIncu8ator(std::string const sensorType, std::string const displayType);
+	bool initIncu8ator(std::string const sensorType, std::string const displayType, int sensorGPIOPin, int readAlgorythm, double maxTemp, int maxSensorError);
 	void startIncu8ator(void);
 	bool controlTemp(void);
 };

@@ -140,3 +140,6 @@ double programWheel::getWantedTemperature(void) {
 double programWheel::getWantedHumidity(void) {
 	return 60.0;
 }
+double programWheel::getElapsedHours(void) {
+	return (el?el->getElapsedSeconds()/3600:0.0);
+}
