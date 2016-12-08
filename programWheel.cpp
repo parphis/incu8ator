@@ -143,3 +143,6 @@ double programWheel::getWantedHumidity(void) {
 double programWheel::getElapsedHours(void) {
 	return (el?el->getElapsedSeconds()/3600:0.0);
 }
+double programWheel::getInterval(void) {
+	return steps.at(stepID).interval;
+}

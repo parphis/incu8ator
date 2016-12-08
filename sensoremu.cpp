@@ -27,6 +27,8 @@ void sensorEmu::readOut(void) {
 	temperature = doubleRand(28.0, 45.0);
 	humidity = doubleRand(40.0, 80.0);
 	crcError = (int)doubleRand(0.0,2.0);
+	if(crcError>0)	crcErrorCounter++;
+	else	crcErrorCounter = 0;
 }
 bool sensorEmu::helloSensor(void) {
 	return true;

@@ -1,10 +1,11 @@
 CC = g++
+C = gcc
 C11 = -std=c++11
 THREAD = -pthread
 DEBUG = -g 
 LFLAGS = -Wall -lssd1306 -lbcm2835 -lrt
 CFLAGS = -Wall -c $(THREAD) $(C11)
-OBJS = nc8tr.o displayBase.o displayStdOut.o displayOLED.o incu8ator.o sensorBase.o sensorDHT22.o sensoremu.o pugixml.o programWheel.o utils.o elapsedTimeThread.o log.o common_dht_read.o pi_2_dht_read.o pi_2_mmio.c
+OBJS = nc8tr.o displayBase.o displayStdOut.o displayOLED.o incu8ator.o sensorBase.o bcm2835.o sensorDHT22.o sensoremu.o pugixml.o programWheel.o utils.o elapsedTimeThread.o log.o common_dht_read.o pi_2_dht_read.o pi_2_mmio.c
 EXENAME = nc8tr
 EXEC = -o $(EXENAME)
 VER = $(EXENAME)_$$(date +'%Y%m%d_%H%M%S')
@@ -24,7 +25,9 @@ incu8ator.o: incu8ator.cpp incu8ator.h sensorBase.h displayBase.h programWheel.h
 	$(CC) $(DEBUG) $(CFLAGS) incu8ator.cpp
 sensorBase.o: sensorBase.cpp sensorBase.h sensoremu.h sensorDHT22.h
 	$(CC) $(DEBUG) $(CFLAGS) sensorBase.cpp
-sensorDHT22.o: sensorDHT22.cpp sensorDHT22.h utils.h log.h pi_2_dht_read.h
+bcm2835.o: ./ArduiPi_SSD1306/bcm2835.c ./ArduiPi_SSD1306/bcm2835.h
+	$(C) $(DEBUG) $(CFLAGS) ./ArduiPi_SSD1306/bcm2835.c
+sensorDHT22.o: sensorDHT22.cpp sensorDHT22.h utils.h log.h pi_2_dht_read.h ./ArduiPi_SSD1306/bcm2835.h
 	$(CC) $(DEBUG) $(CFLAGS) sensorDHT22.cpp
 sensoremu.o: sensoremu.cpp sensoremu.h
 	$(CC) $(DEBUG) $(CFLAGS) sensoremu.cpp

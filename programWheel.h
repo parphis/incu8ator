@@ -62,6 +62,7 @@ public:
 	double getWantedTemperature(void);
 	double getWantedHumidity(void);
 	double getElapsedHours(void);
+	double getInterval(void);
 	bool initProgramWheel(std::string& res);
 	bool startProgramWheel(void);
 };

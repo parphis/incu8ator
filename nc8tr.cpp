@@ -3,6 +3,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <getopt.h>
+#include <csignal>
 #include "incu8ator.h"
 #include "utils.h"
 #include "log.h"
@@ -10,7 +11,8 @@
 namespace {
 	int debug_flag;
 	int report_flag;
-	const std::string version = "incu8ator v0.0.6.0 2016.";
+	const std::string version = "incu8ator v0.0.8.0 2016.";	
+	int heatGPIOPin;
 }
 void show_version(void) {
 	std::cout << version << std::endl;
@@ -24,7 +26,8 @@ void usage(void) {
 	std::cout << "nc8tr [OPTIONS]" << std::endl << std::endl;
 	std::cout << "\t--sensortype <type>, -s <type>\tThe type of the temperature sensor connected. Currently available types are 'emulator' or 'dht22'. Emulator simply generates random temperature and humidity values." << std::endl;
 	std::cout << "\t--displaytype <type>, -d <type>\tThe type of the display connected. Enter 'stdout' to see the messages in your console or write 'OLED12864' if you have this kind of OLED display connected." << std::endl;
-	std::cout << "\t--sensorgpiopin <GPIO PIN#>, -p <GPIO PIN#>\tThe GPIO(!) pin number where the sensor connects. Default is GPIO04, that means the P1-07 physical connection." << std::endl;
+	std::cout << "\t--sensorgpiopin <GPIO PIN#>, -p <GPIO PIN#>\tThe BCM GPIO pin number (input) where the sensor connects. Default is GPIO04, that means the P1-07 physical connection." << std::endl;
+	std::cout << "\t--heatgpiopin <GPIO PIN#>, -w <GPIO PIN#>\tThe BCM GPIO pin number (output) where the heating device connects. Default is GPIO27, that means the P1-13 physical connection." << std::endl;
 	std::cout << "\t--qinterval <number>, -q <number>\tDelay between two sensor query in seconds. The default value is 10 seconds and maximum is also 10 seconds." << std::endl;
 	std::cout << "\t--readalgorythm <number>, -a <number>\tMethod of query the sensor(DHT22). Currently there are two kind of options. Enter 1 to use the solution implemented by the Adafruit team(https://github.com/adafruit/Adafruit_Python_DHT). Or enter 2 to use a custom method gathered from the web from different sources. The first one is the best one." << std::endl;
 	std::cout << "\t--maxtemp <number>, -m <number>\tTurn off the heating device when reaching the given temperature. Set it to a big number e.g. 9999 to avoid checking this limit(not recommended). For emergency purposes. Default value is 40.0°C." << std::endl;
@@ -42,7 +45,7 @@ void usage(void) {
 	std::cout << "YOU ARE USING THIS SOFTWARE WITH ABSOLUTELY NO WARRANTY. I, THE OWNER OF THE SOURCE CODE, AM NOT RESPONSIBLE FOR ANY KIND OF ISSUES OR ACCIDENTS CAUSED BY THE SOFTWARE ITSELF - USE IT FOR YOUR OWN RISK!" << std::endl << std::endl;
 	std::cout << "Istvan Vig (C) 2016." << std::endl;
 }
-bool processOptions(int argc, char *argv[], std::string& sensorType, std::string& displayType, int& sensorGPIOPin, int& queryInterval, int& readAlgorythm, double& maxTemp, int& maxSensorError) {
+bool processOptions(int argc, char *argv[], std::string& sensorType, std::string& displayType, int& sensorGPIOPin, int& heatGPIOPin, int& queryInterval, int& readAlgorythm, double& maxTemp, int& maxSensorError) {
 	int c;
 	int option_index = 0;
 
@@ -61,6 +64,8 @@ bool processOptions(int argc, char *argv[], std::string& sensorType, std::string
 			{"d", required_argument, 0, 'd'},
 			{"sensorgpiopin", required_argument, 0, 'p'},
 			{"p", required_argument, 0, 'p'},
+			{"heatgpiopin", required_argument, 0, 'w'},
+			{"w", required_argument, 0, 'w'},
 			{"qinterval", required_argument, 0, 'q'},
 			{"q", required_argument, 0, 'q'},
 			{"readalgorythm", required_argument, 0, 'a'},
@@ -72,7 +77,7 @@ bool processOptions(int argc, char *argv[], std::string& sensorType, std::string
 			{0, 0, 0, 0},
 		};
 
-		c = getopt_long(argc, argv, "s:d:p:q:a:m:e:h", long_options, &option_index);
+		c = getopt_long(argc, argv, "s:d:p:w:q:a:m:e:h", long_options, &option_index);
 
 		if (c==-1)	break;
 
@@ -87,17 +92,27 @@ bool processOptions(int argc, char *argv[], std::string& sensorType, std::string
 			case 'a': readAlgorythm = atoi(optarg); break;// 1 by default!
 			case 'm': maxTemp = atol(optarg); break;// 40.0 by default!
 			case 'e': maxSensorError = atoi(optarg); break;//5 by default!
+			case 'w': heatGPIOPin = atoi(optarg); break;//27 by default!
 			case '?': break;
 			default: abort();
 		}
 	}
 	return true;
 }
-
+void freeBCM2835(int sig_num) {
+	bcm2835_gpio_write(heatGPIOPin, LOW);
+	bcm2835_close();
+}
+void sigsegvHandler(int sig_num) {	
+	bcm2835_gpio_write(heatGPIOPin, LOW);
+	bcm2835_close();
+	raise(SIGKILL);
+}
 int main(int argc, char* argv[]) {
 	std::string sensorType = "emulator";
 	std::string displayType = "stdout";
 	int sensorGPIOPin = RPI_V2_GPIO_P1_07; // means GPIO04!
+	heatGPIOPin = RPI_V2_GPIO_P1_13; // GPIO27!
 	int queryInterval = 10;
 	int readAlgorythm = 1; // query method of https://github.com/adafruit/Adafruit_Python_DHT
 	double maxTemp = 40.0; // emergency limit
@@ -105,7 +120,10 @@ int main(int argc, char* argv[]) {
 	debug_flag = 0;
 	report_flag = 0;
 
-	if(!processOptions(argc, argv, sensorType, displayType, sensorGPIOPin, queryInterval, readAlgorythm, maxTemp, maxSensorError))
+	signal(SIGINT, freeBCM2835);
+	signal(SIGSEGV, sigsegvHandler);
+
+	if(!processOptions(argc, argv, sensorType, displayType, sensorGPIOPin, heatGPIOPin, queryInterval, readAlgorythm, maxTemp, maxSensorError))
 		return -1;
 
 	// do not allow more than 10 seconds for query interval; please check the comment: incubator.cpp::controlTemp::checking the sensor error counter part!
@@ -126,7 +144,7 @@ int main(int argc, char* argv[]) {
 
 	// undetectable sensor or program wheel issue
 	// both of them are mandatory to run the device
-	if(!i->initIncu8ator(sensorType, displayType, sensorGPIOPin, readAlgorythm, maxTemp, maxSensorError)) {
+	if(!i->initIncu8ator(sensorType, displayType, sensorGPIOPin, heatGPIOPin, readAlgorythm, maxTemp, maxSensorError)) {
 		delete i;
 		return -1;
 	}

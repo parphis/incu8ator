@@ -16,8 +16,7 @@ void incu8ator::sdt(std::string& s) {
     s = buf;
 }
 void incu8ator::toogleHeating(int level) {	
-	bcm2835_gpio_fsel(27, BCM2835_GPIO_FSEL_OUTP);
-	bcm2835_gpio_write(27, level);
+	bcm2835_gpio_write(_heatGPIOPin, level);
 }
 void incu8ator::heatOn(void) {
 	toogleHeating(HIGH);
@@ -43,7 +42,7 @@ incu8ator::~incu8ator(void) {
  * Show the messages on the display.
  * Check the GPIO port used to switch the heat-thread.
  */
-bool incu8ator::initIncu8ator(std::string const sensorType, std::string displayType, int sensorGPIOPin, int readAlgorythm, double maxTemp, int maxSensorError) {
+bool incu8ator::initIncu8ator(std::string const sensorType, std::string displayType, int sensorGPIOPin, int heatGPIOPin, int readAlgorythm, double maxt, int maxse) {
 	log::inf("Starting the incu8ator...");
 	log::inf("Initializing the display...");
 	log::inf(std::string("Wanted display type is \'").append(displayType).append("\'"));
@@ -72,8 +71,12 @@ bool incu8ator::initIncu8ator(std::string const sensorType, std::string displayT
 		return false;
 	}
 
-	maxTemp = maxTemp;
-	maxSensorError = maxSensorError;
+
+	_heatGPIOPin = heatGPIOPin;
+	bcm2835_gpio_fsel(_heatGPIOPin, BCM2835_GPIO_FSEL_OUTP);
+	
+	maxTemp = maxt;
+	maxSensorError = maxse;
 
 	prevTemp = 0.0;
 	heating = true;
@@ -111,7 +114,6 @@ bool incu8ator::controlTemp(void) {
 
 	// check if there was an error in the sensor query
 	if(s->getCrcError(lastError)) {
-
 		int ec = s->getCrcErrorCounter();
 		// the maxSensorError is 5 by default;
 		// the query interval can not be bigger than 10seconds
@@ -146,7 +148,7 @@ bool incu8ator::controlTemp(void) {
 	// inform the user the status of the internals
 	s->getFormattedLines(lines);
 	clearSS(ss);
-	ss << lines << std::endl << p->getElapsedHours();
+	ss << lines << std::endl << std::setprecision(3) <<  p->getElapsedHours() << "/" << p->getInterval() << "h";
 	d->showMessage(ss.str());
 
 	temp = s->getTemperature();
